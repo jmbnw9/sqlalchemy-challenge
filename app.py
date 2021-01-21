@@ -59,5 +59,32 @@ def prcp():
 
     return jsonify(measurements)
 
+@app.route("/api/v1.0/stations")
+def name():
+    active_stations = (session.query(Measurement.station, func.count(Measurement.station)).\
+                   group_by(Measurement.station).order_by(func.count(Measurement.station).desc()).all())
+
+    active_stations
+
+    stations = []
+    for station in active_stations:
+        name_dict = {}
+        name_dict["station"] = station
+        stations.append(name_dict)
+        
+    return jsonify(stations)
+
+@app.route("/api/v1.0/tobs")
+def temperature():
+    temp = session.query(Measurement.tobs).filter(Measurement.station =='USC00519281').filter(Measurement.station > one_year).all()
+
+    temperatures = []
+    for temps in temp:
+        temperature_dict = {}
+        temperature_dict["tobs"] = temp
+        temperature.append(temperature_dict)
+
+    return jsonify(temperature)
+
 if __name__ == '__main__':
     app.run(debug=True)
