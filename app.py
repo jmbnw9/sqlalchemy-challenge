@@ -76,15 +76,17 @@ def name():
 
 @app.route("/api/v1.0/tobs")
 def temperature():
-    temp = session.query(Measurement.tobs).filter(Measurement.station =='USC00519281').filter(Measurement.station > one_year).all()
+    one_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+
+    temp = session.query(Measurement.tobs).filter(Measurement.station =='USC00519281').filter(Measurement.date > one_year).all()
 
     temperatures = []
     for temps in temp:
         temperature_dict = {}
         temperature_dict["tobs"] = temp
-        temperature.append(temperature_dict)
+        temperatures.append(temperature_dict)
 
-    return jsonify(temperature)
+    return jsonify(temperatures)
 
 if __name__ == '__main__':
     app.run(debug=True)
