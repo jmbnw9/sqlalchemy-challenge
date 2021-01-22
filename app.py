@@ -40,8 +40,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br>"
-        f"/api/v1.0/<start><br>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/2010,1,1<br>"
+        f"/api/v1.0/2010,1,1/2012,1,31"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -87,6 +87,45 @@ def temperature():
         temperatures.append(temperature_dict)
 
     return jsonify(temperatures)
+
+@app.route("/api/v1.0/2010,1,1")
+def start():
+    sel = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+
+    results = (session.query(*sel).filter(func.strftime("%Y-%m-%d", Measurement.date)>= "2010,1,1").group_by(Measurement.date).all())
+
+    calculations = []
+    for result in results:
+        start_dict = {}
+        start_dict["Date"] = result [0]
+        start_dict["Min Temp"] = result [1]
+        start_dict["Avg Temp"] = result [2]
+        start_dict["Max Temp"] = result [3]
+        
+        calculations.append(start_dict)
+
+    return jsonify(calculations)
+
+@app.route("/api/v1.0/2010,1,1/2012,1,31")
+def start_end():
+    sel = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+
+    results = (session.query(*sel).filter(func.strftime("%Y-%m-%d", Measurement.date)>= "2010,1,1").\
+        filter(func.strftime("%Y-%m-%d", Measurement.date)<= "2012,1,31").\
+        group_by(Measurement.date).all())
+
+    calculations = []
+    for result in results:
+        start_dict = {}
+        start_dict["Date"] = result [0]
+        start_dict["Min Temp"] = result [1]
+        start_dict["Avg Temp"] = result [2]
+        start_dict["Max Temp"] = result [3]
+        
+        calculations.append(start_dict)
+
+    return jsonify(calculations)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
